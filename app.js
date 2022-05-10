@@ -1,3 +1,8 @@
+var client = contentful.createClient({
+  space: "c8jj3284mh20",
+  accessToken: "4OJef0wcRyXlSpf22P8d0_-M8QRSS5KJYv2Iamcb9Jo",
+});
+
 const cartBtn = document.querySelector(".cart-btn");
 const closeCart = document.querySelector(".close-cart");
 const cleacrCart = document.querySelector(".clear-cart");
@@ -18,9 +23,14 @@ let buttonsDom = [];
 class Products {
   async getProducts() {
     try {
+      let contentFull = await client.getEntries({
+        content_type: "storeProducts",
+      });
+      console.log(contentFull);
+
       let result = await fetch("products.json");
       let data = await result.json();
-      let products = data.items;
+      let products = contentFull.items;
       products = products.map((item) => {
         const { title, price } = item.fields;
         const { id } = item.sys;
