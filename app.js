@@ -12,7 +12,7 @@ const productsDOM = document.querySelector(".products-center");
 let cart = [];
 
 //buttons
-let buttonsDom;
+let buttonsDom = [];
 
 //getting the products
 class Products {
@@ -123,6 +123,54 @@ class UI {
     cartOverlay.classList.add("transparentBcg");
     cartDOM.classList.add("showCart");
   }
+
+  hideCart() {
+    cartOverlay.classList.remove("transparentBcg");
+    cartDOM.classList.remove("showCart");
+  }
+
+  setupAPP() {
+    cart = Storage.getCart();
+    this.setCartValues(cart);
+    this.populateCart(cart);
+    cartBtn.addEventListener("click", this.showCart);
+    closeCart.addEventListener("click", this.hideCart);
+  }
+
+  populateCart(cart) {
+    cart.forEach((item) => {
+      this.addCartItem(item);
+    });
+  }
+
+  cartLogic() {
+    //clear cart button
+    cleacrCart.addEventListener("click", () => {
+      this.clearCart();
+    });
+    //cart functionality
+  }
+
+  clearCart() {
+    let cartItems = cart.map((item) => item.id);
+    cartItems.forEach((id) => this.removeItem(id));
+    while (cartContent.children.length > 0) {
+      cartContent.removeChild(cartContent.children[0]);
+    }
+    this.hideCart();
+  }
+
+  removeItem(id) {
+    cart = cart.filter((item) => item.id !== id);
+    this.setCartValues(cart);
+    Storage.saveCart(cart);
+    let button = this.getSingleButton(id);
+    button.disabled = false;
+    button.innerHTML = `<i class="fas fa-shopping-cart"></i>add to cart`;
+  }
+  getSingleButton(id) {
+    return buttonsDom.find((btn) => btn.dataset.id === id);
+  }
 }
 
 //local storage
@@ -139,12 +187,19 @@ class Storage {
   static saveCart(cart) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }
+
+  static getCart() {
+    return localStorage.getItem("cart")
+      ? JSON.parse(localStorage.getItem("cart"))
+      : [];
+  }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
   const ui = new UI();
   const products = new Products();
-
+  //setup APP
+  ui.setupAPP();
   //get all products
   products
     .getProducts()
@@ -154,5 +209,6 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .then(() => {
       ui.getBagButtons();
+      ui.cartLogic();
     });
 });
